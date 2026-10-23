@@ -1,0 +1,39 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Set ANTHROPIC_API_KEY in Netlify (Site configuration > Environment variables),
+# scoped to Functions. Never commit it, and never give it a VITE_ prefix (Vite
+# would inline VITE_* variables into the browser bundle).
+# Optional: ANTHROPIC_MODEL, ANTHROPIC_EFFORT, RATE_LIMIT_PER_HOUR,
+# RATE_LIMIT_GLOBAL_PER_DAY.
+#
+# Routing: /api/status and /api/analyze are served by the functions in
+# netlify/functions/ through their `export const config = { path }`, so no
+# redirects are needed. The app has no client-side routes, so there is no SPA
+# fallback redirect either.
+
+# Security headers for every static path. All scripts, styles, the pdf.js
+# worker and the /api/* fetches are same-origin, and the build emits no inline
+# scripts or styles, so 'self' is enough everywhere. blob: in img-src covers
+# blob object URLs; the CSV download is an <a download> navigation and is not
+# affected by connect-src. If a future change needs a new origin, add it to
+# the narrowest directive.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+    Permissions-Policy = "accelerometer=(), autoplay=(), browsing-topics=(), camera=(), display-capture=(), encrypted-media=(), geolocation=(), gyroscope=(), hid=(), magnetometer=(), microphone=(), midi=(), payment=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), usb=(), xr-spatial-tracking=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+
+# Hashed build assets never change, so they can be cached for a year.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

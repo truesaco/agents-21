@@ -1,0 +1,262 @@
+{
+  "_comment": "Precomputed findings for the fictional sample proposals. Used by demo mode (no API call). Every quote is re-verified against the sample files at runtime and in tests/demo.test.js.",
+  "turnstile-labs": [
+    {
+      "requirement_id": "R1",
+      "status": "addressed",
+      "summary": "Integrated resale marketplace (Turnstile Exchange); venue sets price floors and caps per event or section.",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"2. Resale Marketplace\"", "quote": "Turnstile One includes Turnstile Exchange, a fully integrated resale marketplace." },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"2. Resale Marketplace\"", "quote": "Venues set resale price floors and price caps per event or per section" }
+      ]
+    },
+    {
+      "requirement_id": "R2",
+      "status": "addressed",
+      "summary": "Rotating barcodes refresh every 15 seconds; scanning continues up to 12 hours offline.",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"3. Mobile Entry and Scanning\"", "quote": "rotating barcodes that refresh every 15 seconds" },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"3. Mobile Entry and Scanning\"", "quote": "scanning continues for up to 12 hours without internet connectivity" }
+      ]
+    },
+    {
+      "requirement_id": "R3",
+      "status": "addressed",
+      "summary": "States 42,000 purchases in the first 10 minutes of an on-sale; virtual waiting room (Turnstile Queue).",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"4. Performance and Scale\"", "quote": "Turnstile One has processed 42,000 ticket purchases in the first 10 minutes of a single on-sale." },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"4. Performance and Scale\"", "quote": "Every high-demand on-sale is protected by Turnstile Queue, our virtual waiting room" }
+      ]
+    },
+    {
+      "requirement_id": "R4",
+      "status": "addressed",
+      "summary": "PCI DSS Level 1 Service Provider; current Attestation of Compliance (March 2026) included as Appendix B. Appendix B itself was not among the provided files.",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"5. Security and Compliance\"", "quote": "Turnstile Labs is certified as a PCI DSS Level 1 Service Provider." },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"5. Security and Compliance\"", "quote": "Our current Attestation of Compliance, dated March 2026, is included as Appendix B." }
+      ]
+    },
+    {
+      "requirement_id": "R5",
+      "status": "not_documented",
+      "summary": "",
+      "evidence": []
+    },
+    {
+      "requirement_id": "R6",
+      "status": "addressed",
+      "summary": "24/7 event-day support; guaranteed 10-minute response for Severity 1 issues.",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"6. Support\"", "quote": "Event-day support is available 24/7 from our Network Operations Center." },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"6. Support\"", "quote": "For Severity 1 issues, we guarantee a response within 10 minutes." }
+      ]
+    },
+    {
+      "requirement_id": "R7",
+      "status": "addressed",
+      "summary": "Purchase flow independently audited to WCAG 2.1 AA; dedicated ADA inventory tool.",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"7. Accessibility\"", "quote": "The Turnstile One fan purchase flow has been independently audited and conforms to WCAG 2.1 Level AA." },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"7. Accessibility\"", "quote": "hold, release and sell accessible seating and companion seats through a dedicated ADA inventory tool" }
+      ]
+    },
+    {
+      "requirement_id": "R8",
+      "status": "addressed",
+      "summary": "Lists fan fee ($4.25/ticket), venue license ($180,000/yr), 2.6% processing, and resale buyer/seller fees.",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"9. Pricing\"", "quote": "Fan service fee: $4.25 per ticket." },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"9. Pricing\"", "quote": "Venue platform license: $180,000 per year." },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"9. Pricing\"", "quote": "Payment processing: 2.6% of gross ticket revenue, charged to the venue." }
+      ]
+    },
+    {
+      "requirement_id": "R9",
+      "status": "partial",
+      "summary": "Native Salesforce connector. Turnstile compatibility with the arena's specific model is not yet confirmed.",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"8. Integrations\"", "quote": "Turnstile One includes a native Salesforce connector that syncs fan profiles and purchases nightly." },
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"8. Integrations\"", "quote": "compatibility with the arena's specific turnstile model will be confirmed during discovery" }
+      ]
+    },
+    {
+      "requirement_id": "R10",
+      "status": "addressed",
+      "summary": "Standard plan is 75 days from signature to first live on-sale.",
+      "evidence": [
+        { "file": "turnstile-labs-proposal.md", "locator": "Section \"10. Implementation\"", "quote": "takes 75 days from contract signature to the first live on-sale" }
+      ]
+    }
+  ],
+  "pulsegate": [
+    {
+      "requirement_id": "R1",
+      "status": "partial",
+      "summary": "Integrated resale with venue-set minimum price. Price caps are not available yet (roadmap: second half of 2027).",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"2. Ticket Resale\"", "quote": "Venues can set a minimum resale price for each event." },
+        { "file": "pulsegate-proposal.md", "locator": "Section \"2. Ticket Resale\"", "quote": "Resale price caps are on our product roadmap for the second half of 2027." }
+      ]
+    },
+    {
+      "requirement_id": "R2",
+      "status": "addressed",
+      "summary": "Dynamic barcodes rotate every 30 seconds; scanners have an offline mode.",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"3. Mobile Tickets\"", "quote": "dynamic barcodes that rotate every 30 seconds" },
+        { "file": "pulsegate-proposal.md", "locator": "Section \"3. Mobile Tickets\"", "quote": "our scanners switch to offline mode and continue validating tickets against a locally stored list" }
+      ]
+    },
+    {
+      "requirement_id": "R3",
+      "status": "partial",
+      "summary": "Virtual waiting room and auto-scaling are described, but no throughput figure is given for the 15,000-in-10-minutes requirement.",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"4. High-Demand On-Sales\"", "quote": "elastic cloud infrastructure that scales automatically for high-demand on-sales" },
+        { "file": "pulsegate-proposal.md", "locator": "Section \"4. High-Demand On-Sales\"", "quote": "Fans enter a virtual waiting room before purchase when demand is high." }
+      ]
+    },
+    {
+      "requirement_id": "R4",
+      "status": "partial",
+      "summary": "States PCI DSS Level 1 compliance; Attestation of Compliance is only available on request under NDA, not provided.",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"5. Payment Security\"", "quote": "PulseGate is a PCI DSS Level 1 compliant service provider." },
+        { "file": "pulsegate-proposal.md", "locator": "Section \"5. Payment Security\"", "quote": "Our Attestation of Compliance is available on request under NDA." }
+      ]
+    },
+    {
+      "requirement_id": "R5",
+      "status": "addressed",
+      "summary": "Venue owns all fan and transaction data; export any time; complete export within 30 days of termination.",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"6. Your Data\"", "quote": "Harbor City Arena will own all fan and transaction data collected through PulseGate Live." },
+        { "file": "pulsegate-proposal.md", "locator": "Section \"6. Your Data\"", "quote": "we will deliver a complete data export within 30 days of contract termination" }
+      ]
+    },
+    {
+      "requirement_id": "R6",
+      "status": "not_documented",
+      "summary": "",
+      "evidence": []
+    },
+    {
+      "requirement_id": "R7",
+      "status": "addressed",
+      "summary": "Purchase flow conforms to WCAG 2.1 AA; accessible and companion seating managed as a separate inventory class.",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"7. Accessibility\"", "quote": "Our purchase flow conforms to WCAG 2.1 Level AA." },
+        { "file": "pulsegate-proposal.md", "locator": "Section \"7. Accessibility\"", "quote": "Accessible and companion seating can be managed as a separate inventory class" }
+      ]
+    },
+    {
+      "requirement_id": "R8",
+      "status": "addressed",
+      "summary": "Fan fee $3.10/ticket; no annual license; venue pays 2.9% processing.",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"9. Fees\"", "quote": "Fan service fee: $3.10 per ticket." },
+        { "file": "pulsegate-proposal.md", "locator": "Section \"9. Fees\"", "quote": "The venue pays a 2.9% payment processing fee on gross ticket revenue." }
+      ]
+    },
+    {
+      "requirement_id": "R9",
+      "status": "partial",
+      "summary": "Bidirectional Salesforce integration. Turnstile compatibility is stated only for \"most major manufacturers\", not the arena's specific system.",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"8. Integrations\"", "quote": "PulseGate Live offers a bidirectional Salesforce integration for fan profiles, purchases and attendance." },
+        { "file": "pulsegate-proposal.md", "locator": "Section \"8. Integrations\"", "quote": "Our entry system is compatible with turnstiles from most major manufacturers." }
+      ]
+    },
+    {
+      "requirement_id": "R10",
+      "status": "conflicts",
+      "summary": "Estimated go-live of about 120 days exceeds the 90-day requirement.",
+      "evidence": [
+        { "file": "pulsegate-proposal.md", "locator": "Section \"10. Timeline\"", "quote": "We expect Harbor City Arena to be live in approximately 120 days from contract signature." }
+      ]
+    }
+  ],
+  "bleacher-box": [
+    {
+      "requirement_id": "R1",
+      "status": "addressed",
+      "summary": "Fan-to-fan resale with venue-controlled price floors and caps.",
+      "evidence": [
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"2. Features\"", "quote": "Fan-to-fan resale with venue-controlled price floors and caps" }
+      ]
+    },
+    {
+      "requirement_id": "R2",
+      "status": "conflicts",
+      "summary": "Rotating QR codes are offered, but an internet connection is required to validate tickets at the gate.",
+      "evidence": [
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"2. Features\"", "quote": "Mobile tickets with rotating QR codes" },
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"3. Gate Entry\"", "quote": "An internet connection is required for ticket validation at the gate." }
+      ]
+    },
+    {
+      "requirement_id": "R3",
+      "status": "partial",
+      "summary": "Virtual queue available. The only volume figure given is 8,000 tickets in the first hour, below the stated 15,000-in-10-minutes requirement.",
+      "evidence": [
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"4. Scalability\"", "quote": "Bleacher Box has handled on-sales of up to 8,000 tickets in the first hour." },
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"4. Scalability\"", "quote": "A virtual queue can be enabled for any event." }
+      ]
+    },
+    {
+      "requirement_id": "R4",
+      "status": "not_documented",
+      "summary": "",
+      "evidence": []
+    },
+    {
+      "requirement_id": "R5",
+      "status": "partial",
+      "summary": "Venue owns its data and can export CSVs at any time. Export upon contract termination is not mentioned.",
+      "evidence": [
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"6. Data\"", "quote": "The venue owns its fan and transaction data." },
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"6. Data\"", "quote": "Data can be exported as CSV files at any time from the venue dashboard." }
+      ]
+    },
+    {
+      "requirement_id": "R6",
+      "status": "addressed",
+      "summary": "24/7 event-day support by phone and chat; 15-minute guaranteed response for critical issues in the SLA.",
+      "evidence": [
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"7. Support\"", "quote": "Our support team is available 24/7 by phone and chat on event days." },
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"7. Support\"", "quote": "Critical issues receive a response within 15 minutes, guaranteed in our service level agreement." }
+      ]
+    },
+    {
+      "requirement_id": "R7",
+      "status": "not_documented",
+      "summary": "",
+      "evidence": []
+    },
+    {
+      "requirement_id": "R8",
+      "status": "partial",
+      "summary": "Fan fee ($2.50/ticket) and no venue license fee are stated. Payment processing fees are not stated.",
+      "evidence": [
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"9. Pricing\"", "quote": "Fan service fee: $2.50 per ticket. No license fees for the venue." }
+      ]
+    },
+    {
+      "requirement_id": "R9",
+      "status": "partial",
+      "summary": "Salesforce integration would have to be built on the REST API. Turnstile integration is not mentioned.",
+      "evidence": [
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"8. Integrations\"", "quote": "A Salesforce integration can be built using the API." }
+      ]
+    },
+    {
+      "requirement_id": "R10",
+      "status": "addressed",
+      "summary": "Most venues live within 45 days of signing.",
+      "evidence": [
+        { "file": "bleacher-box-proposal.md", "locator": "Section \"10. Onboarding\"", "quote": "Most venues are live within 45 days of signing." }
+      ]
+    }
+  ]
+}
