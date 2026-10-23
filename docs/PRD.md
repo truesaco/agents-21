@@ -184,5 +184,5 @@ Each milestone ends with **something you can click**, plus test steps. A milesto
 ## 9. Approval checklist
 - [ ] PRD approved
 - [ ] Build-time agent proposal approved (or changed)
-- [ ] M1 signed off · [ ] M2 · [ ] M3 · [ ] M4
+- [x] M1 signed off · [ ] M2 · [ ] M3 · [ ] M4
 - [ ] PR to `main` approved
