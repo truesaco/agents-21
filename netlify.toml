@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Set ANTHROPIC_API_KEY in Netlify (Site configuration > Environment variables).
+# Never commit it. Optional: ANTHROPIC_MODEL, ANTHROPIC_EFFORT,
+# RATE_LIMIT_PER_HOUR, RATE_LIMIT_GLOBAL_PER_DAY.
