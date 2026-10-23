@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node scripts/check-secrets.mjs --source",
     "build": "vite build",
+    "postbuild": "node scripts/check-secrets.mjs --dist",
+    "check-secrets": "node scripts/check-secrets.mjs",
     "preview": "vite preview",
     "test": "node --test \"tests/**/*.test.js\""
   },
