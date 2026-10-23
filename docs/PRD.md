@@ -66,7 +66,7 @@ Operations and procurement managers at sports teams, leagues and venues compare 
 
 ## 6. Build process and milestones
 
-The remaining work is done by **build-time sub-agents** defined in `.claude/agents/` (proposed; created only after approval). The app's runtime analysis flow is unchanged: one Claude call per vendor in live mode, and no API call in demo mode.
+The remaining work is done by **build-time sub-agents** defined in `.claude/agents/` (approved and created). The app's runtime analysis flow is unchanged: one Claude call per vendor in live mode, and no API call in demo mode.
 
 | Agent | Role | Milestones |
 |---|---|---|
@@ -75,6 +75,8 @@ The remaining work is done by **build-time sub-agents** defined in `.claude/agen
 | `frontend-ui` | UI polish, persistence, accessibility | M3 |
 | `qa-evidence-auditor` | Independent gate: quote verification, demo data, no-winner rule | Runs after every milestone |
 | `docs-demo` | README, demo script, screenshots, "How it works" panel | M4 |
+
+**Priority order (rev 3):** M1 → M4. M2 and M3 are optional and run only on request. `qa-evidence-auditor` still runs after every milestone that runs.
 
 **How each milestone runs**
 1. The main Claude Code session dispatches the milestone's agent with this PRD section as its brief.
