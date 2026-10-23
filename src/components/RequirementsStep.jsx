@@ -87,7 +87,7 @@ export default function RequirementsStep({
             <p className="muted small">
               {liveEnabled
                 ? `Sends the requirements and each vendor's documents to Claude for analysis: ${vendors.length} request(s), rate limited. Each vendor is analyzed on its own, and every quote is verified before it is shown.`
-                : "Not configured on this site. An admin needs to set ANTHROPIC_API_KEY in Netlify."}
+                : "Not configured on this site. An admin needs to add the Anthropic API key in the Netlify environment settings."}
             </p>
           </div>
         </label>
