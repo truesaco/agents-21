@@ -7,6 +7,7 @@ import DocumentsStep from "./components/DocumentsStep.jsx";
 import RequirementsStep from "./components/RequirementsStep.jsx";
 import ComparisonStep from "./components/ComparisonStep.jsx";
 import SourceViewer from "./components/SourceViewer.jsx";
+import HowItWorks from "./components/HowItWorks.jsx";
 
 const STEPS = ["Documents", "Requirements", "Comparison"];
 
@@ -118,6 +119,7 @@ export default function App() {
             </button>
           ))}
         </nav>
+        <HowItWorks />
       </header>
 
       <main>
