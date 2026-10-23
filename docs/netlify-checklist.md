@@ -1,4 +1,4 @@
-# Netlify setup checklist (M1)
+# Netlify setup checklist (M1, updated M4)
 
 These steps are done by you in the Netlify web UI. The build agents can't log
 into your Netlify account, so none of this has been done for you. Menu names
@@ -35,6 +35,7 @@ Optional variables (same screen, scope them to Functions too):
 | `ANTHROPIC_EFFORT` | `low` | Keeps each vendor within Netlify's 60-second streaming limit |
 | `RATE_LIMIT_PER_HOUR` | `12` | Live vendor analyses per IP per hour |
 | `RATE_LIMIT_GLOBAL_PER_DAY` | `150` | Live vendor analyses per day for the whole site |
+| `LIVE_PASSCODE` | unset | Optional shared passcode for live mode. When set, live analysis asks for it; when unset or blank, live mode is open as before. Demo mode never needs it. |
 
 ## 4. Trigger a deploy
 Environment variable changes only apply to new deploys.
@@ -57,3 +58,18 @@ Check the deploy log. You should see two lines starting with `check-secrets: OK.
 4. In DevTools, open **Network**, reload, click the first (document) request, and look at **Response Headers**. `Content-Security-Policy`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff` and `Permissions-Policy` are all there.
 
 While you're in DevTools, also check that the **Console** shows no red "violates the following Content Security Policy directive" messages.
+
+## 7. M4: optional live-mode passcode
+Use this if you don't want anyone with the URL to spend your live quota.
+
+1. **Project configuration → Environment variables → Add a variable**
+   - Key: `LIVE_PASSCODE`
+   - Value: `<your passcode>`. Use a long passphrase of ASCII characters (for example four or more random words). There is no lockout after wrong guesses, so length is what protects it.
+   - Tick **Contains secret values** if offered. **Scopes:** **Functions** only, like the API key.
+   - Do **not** name it `VITE_LIVE_PASSCODE` or put it anywhere in the repo.
+2. Trigger a new deploy (section 4). Variable changes only apply to new deploys.
+3. Check: `<site URL>/api/status` now returns `{"liveEnabled":true,"passcodeRequired":true}`. The passcode itself is never shown.
+4. Open the site in a private window and try live mode. It asks for the passcode; a wrong one is refused with a generic message.
+5. Share the passcode out of band. To rotate it, change the value and redeploy. To turn it off, delete the variable and redeploy.
+
+The rate limit (`RATE_LIMIT_PER_HOUR`, `RATE_LIMIT_GLOBAL_PER_DAY`) still applies on top of the passcode. Since M4 the counters use atomic conditional writes in Netlify Blobs; if Blobs is unreachable, live analysis is refused with a 503 rather than running unmetered.

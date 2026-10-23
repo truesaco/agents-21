@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { SYSTEM_PROMPT, OUTPUT_SCHEMA, buildUserMessage } from "../lib/prompt.mjs";
 import { checkRateLimit } from "../lib/rateLimit.mjs";
+import { checkPasscode } from "../lib/passcode.mjs";
 import { finalizeFindings } from "../../src/lib/verify.js";
 
 // Live analysis of one vendor's documents against the requirements.
@@ -45,6 +46,12 @@ export default async (req, context) => {
     return json(503, { error: "Live analysis is not configured on this site. Set ANTHROPIC_API_KEY in Netlify, or use demo mode." });
   }
 
+  // Optional shared passcode (LIVE_PASSCODE). Checked before parsing or rate
+  // limiting so wrong guesses don't consume the live quota.
+  if (!checkPasscode(req)) {
+    return json(401, { error: "Live mode needs the site passcode. Enter it and try again, or use demo mode.", code: "passcode_required" });
+  }
+
   let body;
   try {
     body = Body.parse(await req.json());
@@ -57,7 +64,7 @@ export default async (req, context) => {
   }
 
   const limit = await checkRateLimit(context?.ip);
-  if (!limit.ok) return json(429, { error: limit.message });
+  if (!limit.ok) return json(limit.status ?? 429, { error: limit.message });
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
