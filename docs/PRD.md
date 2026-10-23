@@ -1,6 +1,6 @@
 # VendorLens — Product Requirements Document
 
-Status: **Draft for review**. Nothing is merged to `main` until this PRD is approved.
+Status: **Draft for review (rev 2)**. Nothing is merged to `main` until this PRD is approved.
 Branch: `claude/eloquent-pasteur-991nv2` (commit `0d53027` holds the current build).
 
 ---
@@ -56,34 +56,57 @@ Operations and procurement managers at sports teams, leagues and venues compare 
 | # | Risk | Impact | Planned in |
 |---|---|---|---|
 | R-1 | Live mode is untested end to end | May fail on deploy | M2 |
-| R-2 | Effort is set to `low` to stay under Netlify's 60-second streaming limit | Lower recall on long or subtle proposals | M2 (measure), M3 (smaller calls) |
-| R-3 | The rate-limit counter is read-then-write, not atomic | Small overshoot under concurrent bursts | M5 |
-| R-4 | No access control; anyone with the URL can spend the live quota | Cost exposure, capped by the rate limit | M5 |
-| R-5 | Work is lost on page refresh | Annoying in a long review | M4 |
+| R-2 | Effort is set to `low` to stay under Netlify's 60-second streaming limit | Lower recall on long or subtle proposals | M2 (measure and tune) |
+| R-3 | The rate-limit counter is read-then-write, not atomic | Small overshoot under concurrent bursts | M4 |
+| R-4 | No access control; anyone with the URL can spend the live quota | Cost exposure, capped by the rate limit | M4 |
+| R-5 | Work is lost on page refresh | Annoying in a long review | M3 |
 | R-6 | Scanned PDFs (no text layer) are rejected | Some proposals can't be used | Out of scope (documented) |
-| R-7 | The numbered-heading heuristic can mistake short list items for headings | Odd locators on some text files | M4 |
-| R-8 | A quote can be verbatim yet not actually support the claim | Misleading cell | M3 (QA checker) |
+| R-7 | The numbered-heading heuristic can mistake short list items for headings | Odd locators on some text files | M3 |
+| R-8 | A quote can be verbatim yet not actually support the claim | Misleading cell | Future enhancement (section 7) |
 
-## 6. Milestones
+## 6. Build process and milestones
 
-Each milestone ends with **something you can click**, plus test steps. A milestone is done only when its test steps pass and you sign off.
+The remaining work is done by **build-time sub-agents** defined in `.claude/agents/` (proposed; created only after approval). The app's runtime analysis flow is unchanged: one Claude call per vendor in live mode, and no API call in demo mode.
+
+| Agent | Role | Milestones |
+|---|---|---|
+| `deploy-security-reviewer` | Netlify config, headers, secret scanning, rate-limit hardening | M1, M4 (security items) |
+| `live-mode-tester` | End-to-end live tests, timing and effort tuning, failure handling | M2 |
+| `frontend-ui` | UI polish, persistence, accessibility | M3 |
+| `qa-evidence-auditor` | Independent gate: quote verification, demo data, no-winner rule | Runs after every milestone |
+| `docs-demo` | README, demo script, screenshots, "How it works" panel | M4 |
+
+**How each milestone runs**
+1. The main Claude Code session dispatches the milestone's agent with this PRD section as its brief.
+2. The agent makes its changes and writes a report to `docs/reports/<milestone>-<agent>.md`.
+3. `qa-evidence-auditor` reviews the diff and writes `docs/reports/<milestone>-qa.md` with a PASS or BLOCK verdict.
+4. The main session commits each agent's work separately, tagged `[agent: <name>]`, and pushes to the feature branch. Agents never push, and nothing goes to `main` without your approval.
+5. You open the clickable result, follow the test steps, and sign off.
+
+Each milestone ends with **something you can click**, plus test steps. A milestone is done only when its test steps pass, QA says PASS, and you sign off.
 
 ### M1 — Deployment prep (preview site)
+**Agent:** `deploy-security-reviewer` · **Gate:** `qa-evidence-auditor`
+
 **Scope**
-- Connect the Netlify site to the repo with deploy previews for branches and pull requests.
-- Add `ANTHROPIC_API_KEY` in Netlify, scoped to Functions. Confirm it never appears in the browser bundle.
 - Add security headers (CSP, no-referrer, frame-deny) in `netlify.toml`.
-- Add a build check that fails if anything that looks like an API key is in the code.
-- Show a "Live mode on / off" indicator in the header.
+- Add `scripts/check-secrets.mjs`, run before every build, which fails if anything that looks like an API key is in the source or in `dist/`.
+- Confirm `ANTHROPIC_API_KEY` is read only through `process.env` inside `netlify/functions/`, and never ends up in the browser bundle.
+- Write the Netlify setup checklist that you follow.
+
+**Manual steps (yours; the agent can't log into your Netlify account)**
+- Connect the repo in Netlify with deploy previews on, and add `ANTHROPIC_API_KEY` scoped to Functions.
 
 **You click:** the Netlify **deploy preview URL** for this branch.
 **How to test**
-1. Open the preview URL. The header shows the live-mode indicator.
-2. Click **Load sample data → Next → Run comparison**. The demo table appears.
-3. In DevTools, open Sources and search the JS for `sk-ant`. There are no matches.
-4. Visit `/api/status`. It returns `{"liveEnabled":true}` and no key.
+1. Open the preview URL, then click **Load sample data → Next → Run comparison**. The demo table appears.
+2. In DevTools, open Sources and search the JS for `sk-ant` and `ANTHROPIC`. There are no matches.
+3. Visit `/api/status`. It returns `{"liveEnabled":true}` and no key.
+4. In DevTools, open Network, click the page request, and check the response headers. `Content-Security-Policy` and `X-Frame-Options` are there.
 
 ### M2 — Live mode testing and hardening
+**Agent:** `live-mode-tester` · **Gate:** `qa-evidence-auditor`
+
 **Scope**
 - Run live analysis on the sample set and compare it with the precomputed demo. Record the differences in `docs/live-test-log.md`.
 - Upload at least one real PDF and one DOCX (non-confidential) and check the page and section locators.
@@ -100,18 +123,11 @@ Each milestone ends with **something you can click**, plus test steps. A milesto
 5. Run 13 analyses within an hour from one browser. The 13th shows the rate-limit message.
 6. Upload a PDF. Its quotes show "Page N" locators.
 
-### M3 — Specialist analysis agents (proposal; needs approval before any build)
-**Scope:** Split each vendor's analysis into domain analysts plus an evidence checker and a synthesizer. Roles, inputs, boundaries and checks are proposed separately and **are not created until approved**. Each requirement is routed to one domain analyst (shown and editable in Step 2). Vendors stay isolated: no agent ever sees more than one vendor.
+### M3 — UI polish
+**Agent:** `frontend-ui` · **Gate:** `qa-evidence-auditor`
 
-**You click:** the deploy preview → Step 2 shows an **Analyst** column per requirement; Step 3 cells show which analyst produced each finding and a "QA checked" mark.
-**How to test**
-1. Load the sample and switch to live mode. Each requirement has an analyst assigned, and you can change it.
-2. Run the comparison. Every cell shows the analyst and the QA result.
-3. Open a cell the QA checker downgraded. It explains why the quote didn't support the claim.
-4. Search the output for words like "recommend", "best" or "winner". Nothing is found (an automated test also checks this).
-
-### M4 — UI polish
 **Scope**
+- Show a "Live mode on / off" indicator in the header.
 - Save work to the browser (localStorage) so a refresh doesn't lose documents, requirements or results, plus a "Clear saved work" button.
 - Drag and drop to upload; a progress state while files are parsed.
 - Comparison table: sticky requirement column on wide tables, filters by status and by vendor, and a "Copy citation" button on each quote.
@@ -120,17 +136,20 @@ Each milestone ends with **something you can click**, plus test steps. A milesto
 
 **You click:** the deploy preview.
 **How to test**
-1. Load the sample data, run it, then refresh the page. Everything is still there.
-2. Drag a PDF onto a vendor card. It's added with a progress state.
-3. Scroll the table sideways on a laptop screen. The requirement column stays visible.
-4. Tab through the whole flow without a mouse. Every action can be reached and has a visible focus ring.
-5. Switch your operating system to dark mode. Everything stays readable.
+1. The header shows "Live mode on" on the preview site.
+2. Load the sample data, run it, then refresh the page. Everything is still there.
+3. Drag a PDF onto a vendor card. It's added with a progress state.
+4. Scroll the table sideways on a laptop screen. The requirement column stays visible.
+5. Tab through the whole flow without a mouse. Every action can be reached and has a visible focus ring.
+6. Switch your operating system to dark mode. Everything stays readable.
 
-### M5 — README, demo script and production deploy
+### M4 — README, demo script and production deploy
+**Agents:** `docs-demo` (README, demo script, "How it works" panel) and `deploy-security-reviewer` (atomic rate limit, passcode) · **Gate:** `qa-evidence-auditor` · **Merge:** the main session opens the PR; you approve it
+
 **Scope**
-- README with a **5-minute demo script** (below), screenshots, setup and environment-variable reference.
-- In-app "How it works" panel explaining the four principles.
-- Make the rate-limit write atomic using Blobs conditional writes (R-3). Optional shared passcode for live mode (R-4).
+- README with a **5-minute demo script** (below), screenshots, setup and environment-variable reference. *(docs-demo)*
+- In-app "How it works" panel explaining the four principles. *(docs-demo)*
+- Make the rate-limit write atomic using Blobs conditional writes (R-3). Optional shared passcode for live mode (R-4). *(deploy-security-reviewer)*
 - Merge to `main` through a reviewed PR; Netlify deploys production from `main`.
 
 **You click:** the **production URL** and the README on GitHub.
@@ -139,7 +158,7 @@ Each milestone ends with **something you can click**, plus test steps. A milesto
 2. Turn the passcode on, open the site in a private window, and try live mode. It asks for the passcode.
 3. Netlify shows `main` as the production branch, and the deploy log is green.
 
-**Draft demo script (to be finalized in M5)**
+**Draft demo script (to be finalized in M4)**
 1. *"This is VendorLens. It compares vendor proposals against our requirements using only the documents we give it."* Click **Load sample data**.
 2. *"Three fictional ticketing vendors and our arena's requirements."* Open **Sections** on one proposal to show the locators.
 3. Click **Next**. *"It pulled out 10 requirements. I can edit them."*
@@ -147,14 +166,21 @@ Each milestone ends with **something you can click**, plus test steps. A milesto
 5. Point to the grey cells. *"Not documented in provided materials. Turnstile never mentions data ownership, and PulseGate has no support SLA."*
 6. *"Notice there's no score or winner. That decision stays with us."* Click **Export CSV**.
 
-## 7. Out of scope (v1)
+## 7. Future enhancements (not planned for v1)
+
+**Runtime specialist analysts.** Split each vendor's live analysis into domain analysts (Finance & Contract, Operations, Fan Experience), each seeing only its assigned requirements, plus a runtime QA checker. The checker would confirm each verbatim quote actually *supports* its claim (risk R-8). It could only lower a status, never raise it, and would give a reason for every change. Vendors would stay isolated, and no agent would compare vendors or recommend one.
+- **Why later:** about 4× the API calls per comparison, and more calls to fit inside Netlify's 60-second limit.
+- **v1 decision:** keep one call per vendor. Do not add runtime API calls.
+
+## 8. Out of scope (v1)
 - Web research, vendor outreach, or any data outside the uploaded files.
 - Scoring, weighting, ranking or recommending vendors.
 - OCR for scanned PDFs.
 - User accounts and server-side storage of documents.
+- Additional runtime API calls (see section 7).
 
-## 8. Approval checklist
+## 9. Approval checklist
 - [ ] PRD approved
-- [ ] Sub-agent proposal approved (or changed)
-- [ ] M1 signed off · [ ] M2 · [ ] M3 · [ ] M4 · [ ] M5
+- [ ] Build-time agent proposal approved (or changed)
+- [ ] M1 signed off · [ ] M2 · [ ] M3 · [ ] M4
 - [ ] PR to `main` approved
