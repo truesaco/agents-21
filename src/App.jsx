@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SAMPLE } from "./samples/index.js";
 import demoResults from "./demo/demoResults.json";
 import { finalizeFindings } from "./lib/verify.js";
@@ -9,6 +9,7 @@ import ComparisonStep from "./components/ComparisonStep.jsx";
 import SourceViewer from "./components/SourceViewer.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";
 import Hero from "./components/Hero.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 
 const STEPS = ["Documents", "Requirements", "Comparison"];
 
@@ -30,6 +31,16 @@ export default function App() {
   const [mode, setMode] = useState("demo");
   const [liveEnabled, setLiveEnabled] = useState(false);
   const [viewing, setViewing] = useState(null);
+
+  // Start each step at the top of the page (not on first load).
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) {
+      firstStep.current = false;
+      return;
+    }
+    window.scrollTo(0, 0);
+  }, [step]);
 
   useEffect(() => {
     fetchStatus().then((s) => setLiveEnabled(Boolean(s.liveEnabled)));
@@ -105,7 +116,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="logo" aria-hidden="true">◎</span>
+          <span className="logo" aria-hidden="true" />
           <div>
             <BrandName className="brand-name">VendorLens</BrandName>
             <p className="tagline">Evidence-backed vendor comparison. You make the call.</p>
@@ -124,7 +135,10 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <HowItWorks />
+        <div className="header-actions">
+          <HowItWorks />
+          <ThemeToggle />
+        </div>
       </header>
 
       <main>
