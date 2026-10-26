@@ -36,3 +36,24 @@ Date: 2026-10-23. Agent: `docs-demo`. Nothing has been committed or pushed.
 - Live mode, Netlify deployment, the Blobs atomic writes and real PDF/DOCX files are all **untested**, and the README says so.
 - The demo was validated on a local `vite preview`, not on the production URL (no access).
 - `App.jsx` needed 2 lines, not 1 (see above).
+
+## Pass 2 (audit on `main` at ca0751a)
+
+**Scope:** audited README.md, docs/demo-script.md and the How it works panel against PRD section "M4 — README, demo script and production deploy" and the current code.
+
+**Verified (no change needed)**
+- README covers every M4 scope item: 5-minute demo script with screenshots, setup, environment-variable reference, Netlify deploy (production branch `main`), and the How it works panel reachable from the header (`src/App.jsx` renders `<HowItWorks />`).
+- Every UI string quoted in the docs exists in `src/` ("Not configured on this site.", "Only available for the unmodified sample data.", "Demo mode: precomputed results", "VendorLens does not pick a winner.", step labels).
+- Env-var defaults in the README match the code: `ANTHROPIC_MODEL` = `claude-opus-5-5`, `ANTHROPIC_EFFORT` = `low`, `RATE_LIMIT_PER_HOUR` = 12, `RATE_LIMIT_GLOBAL_PER_DAY` = 150.
+- No passcode handling exists anywhere in `src/` (confirmed by grep). The app shows the server's 401 error text as-is.
+- Sample vendors are still called fictional throughout. Live mode is still described as untested end to end.
+
+**Changed**
+- README.md: the passcode status line now says plainly "server-side only": no UI input, the app never sends `X-VendorLens-Passcode`, every live analysis fails while `LIVE_PASSCODE` is set, leave it unset. It also says PRD M4 test 2 can't pass yet. The `LIVE_PASSCODE` table row now says "server-side only for now; leave unset".
+
+**Check results**
+- `node docs/scripts/check-docs.mjs`: PASS. The 6 env vars match in both directions. README has 22 relative links and docs/demo-script.md has 10, and all resolve.
+- `check-demo-script.mjs` against `vite preview --port 4173` (Chromium): 9/9 steps PASS. All 24 bold labels appeared on screen. The only console error was the expected `/api/status` 404. The preview server was stopped by PID afterwards.
+- `npm test`: 27/27 pass. `npm run build`: passes, and both `check-secrets: OK` scans pass.
+
+**Mismatch still open (not a docs fix):** PRD M4 test 2 (the passcode prompt) needs a passcode input in the app. That is outside docs-demo scope.
