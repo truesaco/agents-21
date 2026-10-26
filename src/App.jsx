@@ -8,6 +8,7 @@ import RequirementsStep from "./components/RequirementsStep.jsx";
 import ComparisonStep from "./components/ComparisonStep.jsx";
 import SourceViewer from "./components/SourceViewer.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";
+import Hero from "./components/Hero.jsx";
 
 const STEPS = ["Documents", "Requirements", "Comparison"];
 
@@ -96,13 +97,17 @@ export default function App() {
     if (segment) setViewing({ file, locator, quote, text: segment.text });
   };
 
+  // On Step 1 the hero headline is the page's h1, so the brand name drops to a
+  // plain paragraph there; on the other steps the brand name stays the h1.
+  const BrandName = step === 0 ? "p" : "h1";
+
   return (
     <div className="app">
       <header className="topbar">
         <div className="brand">
           <span className="logo" aria-hidden="true">◎</span>
           <div>
-            <h1>VendorLens</h1>
+            <BrandName className="brand-name">VendorLens</BrandName>
             <p className="tagline">Evidence-backed vendor comparison. You make the call.</p>
           </div>
         </div>
@@ -123,6 +128,7 @@ export default function App() {
       </header>
 
       <main>
+        {step === 0 && <Hero targetId="step-documents-title" />}
         {step === 0 && (
           <DocumentsStep
             requirementsDoc={requirementsDoc}

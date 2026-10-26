@@ -21,10 +21,12 @@ export default function DocumentsStep({ requirementsDoc, setRequirementsDoc, ven
   };
 
   return (
-    <section className="panel">
+    <section className="panel" id="step-documents" aria-labelledby="step-documents-title">
       <div className="panel-head">
         <div>
-          <h2>1. Add your documents</h2>
+          <h2 id="step-documents-title" className="step-heading" tabIndex={-1}>
+            1. Add your documents
+          </h2>
           <p className="muted">Upload or paste your internal requirements and each vendor's proposal. These files are the complete evidence set.</p>
         </div>
         {!empty && (
