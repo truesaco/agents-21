@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SAMPLE } from "./samples/index.js";
 import demoResults from "./demo/demoResults.json";
 import { finalizeFindings } from "./lib/verify.js";
@@ -8,6 +8,8 @@ import RequirementsStep from "./components/RequirementsStep.jsx";
 import ComparisonStep from "./components/ComparisonStep.jsx";
 import SourceViewer from "./components/SourceViewer.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";
+import Hero from "./components/Hero.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 
 const STEPS = ["Documents", "Requirements", "Comparison"];
 
@@ -29,6 +31,16 @@ export default function App() {
   const [mode, setMode] = useState("demo");
   const [liveEnabled, setLiveEnabled] = useState(false);
   const [viewing, setViewing] = useState(null);
+
+  // Start each step at the top of the page (not on first load).
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) {
+      firstStep.current = false;
+      return;
+    }
+    window.scrollTo(0, 0);
+  }, [step]);
 
   useEffect(() => {
     fetchStatus().then((s) => setLiveEnabled(Boolean(s.liveEnabled)));
@@ -96,13 +108,17 @@ export default function App() {
     if (segment) setViewing({ file, locator, quote, text: segment.text });
   };
 
+  // On Step 1 the hero headline is the page's h1, so the brand name drops to a
+  // plain paragraph there; on the other steps the brand name stays the h1.
+  const BrandName = step === 0 ? "p" : "h1";
+
   return (
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <span className="logo" aria-hidden="true">◎</span>
+          <span className="logo" aria-hidden="true" />
           <div>
-            <h1>VendorLens</h1>
+            <BrandName className="brand-name">VendorLens</BrandName>
             <p className="tagline">Evidence-backed vendor comparison. You make the call.</p>
           </div>
         </div>
@@ -119,10 +135,14 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <HowItWorks />
+        <div className="header-actions">
+          <HowItWorks />
+          <ThemeToggle />
+        </div>
       </header>
 
       <main>
+        {step === 0 && <Hero targetId="step-documents-title" />}
         {step === 0 && (
           <DocumentsStep
             requirementsDoc={requirementsDoc}
