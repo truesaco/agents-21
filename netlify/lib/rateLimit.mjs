@@ -17,6 +17,7 @@ import { getStore } from "@netlify/blobs";
 
 const DEFAULT_PER_IP_PER_HOUR = intEnv("RATE_LIMIT_PER_HOUR", 12);
 const DEFAULT_GLOBAL_PER_DAY = intEnv("RATE_LIMIT_GLOBAL_PER_DAY", 150);
+const DEFAULT_PASSCODE_FAILS_PER_HOUR = intEnv("PASSCODE_FAILS_PER_HOUR", 10);
 const MAX_ATTEMPTS = 5;
 
 function intEnv(name, fallback) {
@@ -90,6 +91,8 @@ const UNAVAILABLE = {
   message: "Live analysis is temporarily unavailable because the usage limit could not be checked. Try again shortly, or use demo mode.",
 };
 
+const hashIp = (ip) => createHash("sha256").update(String(ip || "unknown")).digest("hex").slice(0, 16);
+
 export function createRateLimiter({
   store,
   perIpPerHour = DEFAULT_PER_IP_PER_HOUR,
@@ -102,7 +105,7 @@ export function createRateLimiter({
     const iso = now().toISOString();
     const hour = iso.slice(0, 13);
     const day = iso.slice(0, 10);
-    const ipHash = createHash("sha256").update(String(ip || "unknown")).digest("hex").slice(0, 16);
+    const ipHash = hashIp(ip);
     const opts = { maxAttempts, backoffMs };
 
     try {
@@ -125,4 +128,43 @@ export function createRateLimiter({
 export async function checkRateLimit(ip) {
   const store = openStore() ?? memoryStore;
   return createRateLimiter({ store })(ip);
+}
+
+// Per-IP throttle on wrong live-mode passcodes (R-4 follow-up). Only failures
+// are counted, in a separate counter per IP per hour. Once an IP reaches the
+// limit, every passcode-gated request from it is refused with 429 for the rest
+// of the hour, including one with the right passcode, so a locked-out client
+// cannot learn whether a guess was correct. Concurrent guesses that all pass
+// the lockout check before any failure is recorded can overshoot the limit by
+// at most the number of requests in flight at that moment.
+export function createPasscodeGuard({
+  store,
+  failuresPerHour = DEFAULT_PASSCODE_FAILS_PER_HOUR,
+  now = () => new Date(),
+  maxAttempts = MAX_ATTEMPTS,
+  backoffMs = 15,
+} = {}) {
+  const keyFor = (ip) => `pcfail-${hashIp(ip)}-${now().toISOString().slice(0, 13)}`;
+  return {
+    failuresPerHour,
+    // true when this IP has used up its wrong-passcode allowance this hour.
+    // Throws if the store cannot be read (caller fails closed).
+    async isLocked(ip) {
+      const entry = await store.getWithMetadata(keyFor(ip), { type: "json" });
+      const raw = entry?.data?.count;
+      return Number.isInteger(raw) && raw >= failuresPerHour;
+    },
+    // Records one wrong guess. Never throws; a lost write only weakens the throttle.
+    async recordFailure(ip) {
+      try {
+        await incrementIfBelow(store, keyFor(ip), failuresPerHour, { maxAttempts, backoffMs });
+      } catch (err) {
+        console.error("passcode failure not recorded", err?.message ?? err);
+      }
+    },
+  };
+}
+
+export function passcodeGuard() {
+  return createPasscodeGuard({ store: openStore() ?? memoryStore });
 }

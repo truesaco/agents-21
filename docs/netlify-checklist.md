@@ -36,6 +36,7 @@ Optional variables (same screen, scope them to Functions too):
 | `RATE_LIMIT_PER_HOUR` | `12` | Live vendor analyses per IP per hour |
 | `RATE_LIMIT_GLOBAL_PER_DAY` | `150` | Live vendor analyses per day for the whole site |
 | `LIVE_PASSCODE` | unset | Optional shared passcode for live mode. When set, live analysis asks for it; when unset or blank, live mode is open as before. Demo mode never needs it. |
+| `PASSCODE_FAILS_PER_HOUR` | `10` | Wrong passcode guesses allowed per IP per hour. After that, live mode from that IP returns 429 for the rest of the hour, even with the right passcode. |
 
 ## 4. Trigger a deploy
 Environment variable changes only apply to new deploys.
@@ -64,12 +65,12 @@ Use this if you don't want anyone with the URL to spend your live quota.
 
 1. **Project configuration → Environment variables → Add a variable**
    - Key: `LIVE_PASSCODE`
-   - Value: `<your passcode>`. Use a long passphrase of ASCII characters (for example four or more random words). There is no lockout after wrong guesses, so length is what protects it.
+   - Value: `<your passcode>`. Use a long passphrase of ASCII characters (for example four or more random words). Wrong guesses are limited per IP (`PASSCODE_FAILS_PER_HOUR`, default 10), but an attacker with many IPs can still guess, so length is what really protects it.
    - Tick **Contains secret values** if offered. **Scopes:** **Functions** only, like the API key.
    - Do **not** name it `VITE_LIVE_PASSCODE` or put it anywhere in the repo.
 2. Trigger a new deploy (section 4). Variable changes only apply to new deploys.
 3. Check: `<site URL>/api/status` now returns `{"liveEnabled":true,"passcodeRequired":true}`. The passcode itself is never shown.
-4. Open the site in a private window and try live mode. It asks for the passcode; a wrong one is refused with a generic message.
+4. Open the site in a private window and try live mode. It asks for the passcode; a wrong one is refused with a generic message. After 10 wrong tries in an hour from the same network, live mode says to try again in an hour.
 5. Share the passcode out of band. To rotate it, change the value and redeploy. To turn it off, delete the variable and redeploy.
 
 The rate limit (`RATE_LIMIT_PER_HOUR`, `RATE_LIMIT_GLOBAL_PER_DAY`) still applies on top of the passcode. Since M4 the counters use atomic conditional writes in Netlify Blobs; if Blobs is unreachable, live analysis is refused with a 503 rather than running unmetered.

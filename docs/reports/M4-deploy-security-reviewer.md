@@ -39,3 +39,27 @@ Not run here: a real Netlify Blobs conditional write (no Netlify login). The Blo
 4. **The per-IP counter is incremented before the global check.** A request denied by the global limit still uses one of that IP's hourly slots. This is minor and matches the previous behaviour.
 5. **Blobs cost and latency.** Each allowed request is 2 reads and 2 writes, plus retries under contention. That's fine at these limits.
 6. `src/` changes (passcode input) are out of my scope, so PRD M4 test step 2 ("asks for the passcode") can't pass until the client is wired up.
+
+## Pass 2 (re-verification and passcode throttle)
+
+**Re-verified against PRD M4, R-3 and R-4.** R-3: `incrementIfBelow` uses Blobs `onlyIfMatch`/`onlyIfNew` with bounded retries and fails closed (503) on persistent conflict or store errors; covered by `tests/rateLimit.test.js`. R-4: `LIVE_PASSCODE` is checked server-side with a constant-time compare before body parsing and rate limiting; `/api/status` returns booleans only. No gaps found there.
+
+**Gap fixed: wrong passcode guesses were unthrottled (old open item 2).**
+- `netlify/lib/rateLimit.mjs`: new `createPasscodeGuard` / `passcodeGuard()`. Counts only failures, per hashed IP per hour (key `pcfail-<ipHash>-<hour>`, same Blobs store, same atomic `incrementIfBelow`). Limit `PASSCODE_FAILS_PER_HOUR`, default 10.
+- `netlify/functions/analyze.mjs`: when a passcode is configured, a locked-out IP gets `429 {error, code:"passcode_locked"}` *before* the passcode is compared, so it applies to right and wrong guesses alike and a locked client can't learn whether a guess was correct. A wrong guess records a failure and returns the same 401 `passcode_required` as before. If the lockout read fails, the request is refused with 503 (fail closed, same as the rate limit). If recording a failure fails, it is logged and the 401 still goes out.
+- Correct passcodes never touch the failure counter and still don't consume the live quota until the normal rate limit.
+- Known limit: concurrent guesses that all pass the lockout read before any failure is recorded can overshoot by the number of requests in flight. Distributed guessing across many IPs is not stopped; a long passphrase is still the real protection (stated in the checklist).
+- `tests/passcodeThrottle.test.js` (4 tests): lock after N failures, per-IP and per-hour isolation, the stored count stays at the limit under 20 concurrent failures, store-error behaviour, and end-to-end on `analyze`: 10 x 401, then 429 `passcode_locked` even with the right passcode, while another IP still gets past the gate (400 on the dummy body, no API call).
+- `docs/netlify-checklist.md`: added `PASSCODE_FAILS_PER_HOUR` and updated the passcode wording.
+
+**Client contract change:** additive only. `POST /api/analyze` can now return `429 {"error": "...", "code": "passcode_locked"}`. The current client already shows `data.error` for any non-OK response. A future passcode UI should not re-prompt on `passcode_locked`.
+
+**Checks (pass 2)**
+| Check | Command | Result |
+|---|---|---|
+| Tests | `npm test` | 31 pass, 0 fail |
+| Build + scan | `npm run build` | prebuild `check-secrets: OK. 63 file(s) scanned in source`; postbuild `OK. 7 file(s) scanned in dist/` |
+| Planted fake key | temp `scripts/zz-planted.mjs` containing a fake `sk-ant-` string, then `node scripts/check-secrets.mjs --source` | `FAILED. 1 possible secret(s)`, exit 1; file removed, rescan OK |
+| Bundle | `grep -r "sk-ant\|ANTHROPIC" dist/` | no matches (exit 1) |
+
+**Still open:** item 1 (prompt wording, outside my scope; `netlify/lib/prompt.mjs` is still unchanged) and item 6 (passcode input in `src/`; `src/` has no passcode handling yet, so PRD M4 test step 2 can't pass until the client sends `X-VendorLens-Passcode`).

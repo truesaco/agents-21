@@ -1,8 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { SYSTEM_PROMPT, OUTPUT_SCHEMA, buildUserMessage } from "../lib/prompt.mjs";
-import { checkRateLimit } from "../lib/rateLimit.mjs";
-import { checkPasscode } from "../lib/passcode.mjs";
+import { checkRateLimit, passcodeGuard } from "../lib/rateLimit.mjs";
+import { checkPasscode, passcodeRequired } from "../lib/passcode.mjs";
 import { finalizeFindings } from "../../src/lib/verify.js";
 
 // Live analysis of one vendor's documents against the requirements.
@@ -47,9 +47,24 @@ export default async (req, context) => {
   }
 
   // Optional shared passcode (LIVE_PASSCODE). Checked before parsing or rate
-  // limiting so wrong guesses don't consume the live quota.
-  if (!checkPasscode(req)) {
-    return json(401, { error: "Live mode needs the site passcode. Enter it and try again, or use demo mode.", code: "passcode_required" });
+  // limiting so wrong guesses don't consume the live quota. Wrong guesses are
+  // throttled per IP; a locked-out IP gets 429 whether or not the guess is right.
+  if (passcodeRequired()) {
+    const guard = passcodeGuard();
+    let locked;
+    try {
+      locked = await guard.isLocked(context?.ip);
+    } catch (err) {
+      console.error("passcode throttle check failed; denying request", err?.message ?? err);
+      return json(503, { error: "Live analysis is temporarily unavailable because the usage limit could not be checked. Try again shortly, or use demo mode." });
+    }
+    if (locked) {
+      return json(429, { error: "Too many wrong passcode attempts from this network. Try again in an hour, or use demo mode.", code: "passcode_locked" });
+    }
+    if (!checkPasscode(req)) {
+      await guard.recordFailure(context?.ip);
+      return json(401, { error: "Live mode needs the site passcode. Enter it and try again, or use demo mode.", code: "passcode_required" });
+    }
   }
 
   let body;
