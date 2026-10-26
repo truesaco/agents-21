@@ -79,12 +79,13 @@ Set these in **Netlify → Project configuration → Environment variables**, ea
 | `RATE_LIMIT_PER_HOUR` | No | `12` | Live vendor analyses allowed per IP address per hour. |
 | `RATE_LIMIT_GLOBAL_PER_DAY` | No | `150` | Live vendor analyses allowed per day for the whole site. |
 | `LIVE_PASSCODE` | No | (unset: no passcode) | Optional shared passcode for live mode (server-side only for now; **leave unset**, see below). When set, `/api/analyze` refuses live requests that don't carry the matching passcode. Use a long ASCII passphrase. Demo mode never needs it. |
+| `PASSCODE_FAILS_PER_HOUR` | No | `10` | Wrong passcode attempts allowed per IP address per hour. After that, `/api/analyze` returns HTTP 429 with `"code": "passcode_locked"`. Scope it to Functions. Only matters when `LIVE_PASSCODE` is set. |
 
 Notes:
 - Rate-limit counters are stored in Netlify Blobs, so there's nothing extra to set up on Netlify. Since M4 the counter writes are atomic. If Blobs can't be reached, live analysis is refused (503) rather than running without a limit.
 - Live analysis caps each vendor's documents at 250,000 characters.
 - **Passcode contract:** `GET /api/status` returns `{"liveEnabled": boolean, "passcodeRequired": boolean}`. The browser sends the passcode on `POST /api/analyze` in the `X-VendorLens-Passcode` header. A missing or wrong passcode returns HTTP 401 with `"code": "passcode_required"`.
-- **Passcode status: server-side only.** The server-side check and the `passcodeRequired` flag in `/api/status` are in place and unit-tested. The app has no passcode input yet and never sends the `X-VendorLens-Passcode` header, so with `LIVE_PASSCODE` set, every live analysis fails with "Live mode needs the site passcode. Enter it and try again, or use demo mode." Leave `LIVE_PASSCODE` unset until the input ships. This means PRD M4 test 2 ("it asks for the passcode") can't pass yet.
+- **Passcode status: server-side only.** The server-side check and the `passcodeRequired` flag in `/api/status` are in place and unit-tested. The app has no passcode input yet and never sends the `X-VendorLens-Passcode` header, so with `LIVE_PASSCODE` set, every live analysis fails with "Live mode needs the site passcode. Enter it and try again, or use demo mode." After `PASSCODE_FAILS_PER_HOUR` wrong attempts (default 10) from one IP address in an hour, it returns HTTP 429 `passcode_locked`. Leave `LIVE_PASSCODE` unset until the input ships. This means PRD M4 test 2 ("it asks for the passcode") can't pass yet.
 
 ## Deploy to Netlify
 

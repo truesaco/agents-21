@@ -57,3 +57,4 @@ Date: 2026-10-23. Agent: `docs-demo`. Nothing has been committed or pushed.
 - `npm test`: 27/27 pass. `npm run build`: passes, and both `check-secrets: OK` scans pass.
 
 **Mismatch still open (not a docs fix):** PRD M4 test 2 (the passcode prompt) needs a passcode input in the app. That is outside docs-demo scope.
+- Follow-up: added the `PASSCODE_FAILS_PER_HOUR` row to the README env table (default 10; wrong passcode attempts per IP per hour before HTTP 429 `passcode_locked`; Functions scope; only matters when `LIVE_PASSCODE` is set) and a mention in the passcode status note. `check-docs.mjs` passes again: the 7 env vars match both ways and all links resolve. `npm test`: 31/31 pass.
